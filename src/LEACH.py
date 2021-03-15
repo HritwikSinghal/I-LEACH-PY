@@ -279,8 +279,18 @@ class LEACHSimulation:
             print('############# Main loop Initialization #############')
             print('####################################################')
             print()
+            self.srp = 0  # counter number of sent routing packets
+            self.rrp = 0  # counter number of receive routing packets
+            self.sdp = 0  # counter number of sent data packets to sink
+            self.rdp = 0  # counter number of receive data packets by sink
 
-            self.srp, self.rrp, self.sdp, self.rdp = reset_sensors.start(self.Sensors, self.my_model, round_number)
+            self.SRP[self.my_model.rmax] = self.srp
+            self.RRP[self.my_model.rmax] = self.rrp
+            self.SDP[self.my_model.rmax] = self.sdp
+            self.RDP[self.my_model.rmax] = self.rdp
+            reset_sensors.start(self.Sensors, self.my_model, round_number)
+
+
 
             # todo: test
             print("Sensors: ", )
@@ -289,6 +299,15 @@ class LEACHSimulation:
             # ########################################
             # ############# plot Sensors #############
             # ########################################
+            death_num=0
+            for sensor in self.Sensors:
+                if(sensor.E<=0):
+                    death_num+=1
+
+            if death_num>=1:
+                if self.flag_first_dead == 0:
+                    self.first_dead = round_number
+                    self.flag_first_dead = 1
 
             # #################################################
             # ############# cluster head election #############
@@ -376,20 +395,21 @@ class LEACHSimulation:
 
         # Broadcasting CH x to All Sensors that are in Radio Rage of x.
         # Doing this for all CH
-        for ch_id in self.list_CH:
+        for i in range(1,len(self.list_CH)):
             # todo: test
-            print(f'for cluster head: {ch_id}')
-            self.receivers: list = findReceiver.start(self.Sensors, self.my_model, sender=ch_id,
-                                                      senderRR=self.Sensors[ch_id].RR)
+            # print(f'for cluster head: {ch_id}')
+            self.sender=self.list_CH[i]
+            self.receivers: list = findReceiver.start(self.Sensors, self.my_model, sender=self.sender,
+                                                      senderRR=self.my_model.RR)
 
             # todo: test
-            print("\nsender (or CH): ", ch_id)
-            print('self.Receivers: ', end='')
-            print(self.receivers)
+            # print("\nsender (or CH): ", ch_id)
+            # print('self.Receivers: ', end='')
+            # print(self.receivers)
 
             # we require the sender parameter of sendReceivePackets.start to be a list.
             self.srp, self.rrp, self.sdp, self.rdp = send_receive_packets.start(
-                self.Sensors, self.my_model, [ch_id], self.receivers, self.srp, self.rrp, self.sdp, self.rdp,
+                self.Sensors, self.my_model, [self.sender], self.receivers, self.srp, self.rrp, self.sdp, self.rdp,
                 packet_type='Hello'
             )
 
@@ -426,9 +446,6 @@ class LEACHSimulation:
 
             for receiver in self.list_CH:
                 sender = find_sender.start(self.Sensors, receiver)
-                if len(sender) == 0:
-                    continue
-
                 # todo: test
                 print("sender: ", sender)
                 print("receiver: ", receiver)
@@ -447,26 +464,6 @@ class LEACHSimulation:
                 print("Sensors: ", )
                 var_pp(self.Sensors)
                 print()
-
-        # #####################################################################################################
-        # ############# send Data packet directly from nodes(that aren't in each cluster) to Sink #############
-        # #####################################################################################################
-
-        print("#####################################################################################################")
-        print("############# send Data packet directly from nodes(that aren't in each cluster) to Sink #############")
-        print("#####################################################################################################")
-
-        for sender in self.Sensors:
-            # if the node has sink as its CH but it's not sink itself and the node is not dead
-            if sender.MCH == self.n and sender.id != self.n and sender.E > 0:
-                self.receivers = [self.n]  # Sink
-                sender = [sender.id]  # Other Nodes
-
-                print(f"node {sender} will send directly to sink ")
-                self.srp, self.rrp, self.sdp, self.rdp = send_receive_packets.start(
-                    self.Sensors, self.my_model, sender, self.receivers, self.srp, self.rrp, self.sdp, self.rdp,
-                    packet_type='Data'
-                )
 
         # ###################################################################################
         # ############# Send Data packet from CH to Sink after Data aggregation #############
@@ -499,6 +496,26 @@ class LEACHSimulation:
             print("Sensors: ", )
             var_pp(self.Sensors)
             print()
+        # #####################################################################################################
+        # ############# send Data packet directly from nodes(that aren't in each cluster) to Sink #############
+        # #####################################################################################################
+
+        print("#####################################################################################################")
+        print("############# send Data packet directly from nodes(that aren't in each cluster) to Sink #############")
+        print("#####################################################################################################")
+
+        for i in range(0,len(self.Sensors)):
+            # if the node has sink as its CH but it's not sink itself and the node is not dead
+            if self.Sensors[i].MCH == self.Sensors[self.my_model.n].id:
+                self.receivers = [self.n]  # Sink
+                sender = [self.Sensors[i].id]  # Other Nodes
+
+                print(f"node {sender} will send directly to sink ")
+                self.srp, self.rrp, self.sdp, self.rdp = send_receive_packets.start(
+                    self.Sensors, self.my_model, sender, self.receivers, self.srp, self.rrp, self.sdp, self.rdp,
+                    packet_type='Data'
+                )
+
 
     def __statistics(self, round_number):
         print('######################################')

@@ -37,10 +37,7 @@ def start(Sensors: list[Sensor], my_model: Model, senders: list, receivers: list
     # Energy dissipated from Sensors for Sending a packet
     # Each sender will send to each receiver
     for sender in senders:
-        if Sensors[sender].E > 0:
             for receiver in receivers:
-                if Sensors[receiver].E > 0:
-                    print()
                     distance = sqrt(
                         pow(Sensors[sender].xd - Sensors[receiver].xd, 2) +
                         pow(Sensors[sender].yd - Sensors[receiver].yd, 2)
@@ -51,12 +48,20 @@ def start(Sensors: list[Sensor], my_model: Model, senders: list, receivers: list
                         Sensors[sender].E -= my_model.ETX * PacketSize + my_model.Emp * PacketSize * pow(distance, 4)
                         rec_packets, sent_packets = send_rec(Sensors, my_model, sender, receiver, PacketSize,
                                                              sent_packets, rec_packets)
-
+                        if Sensors[sender].E > 0:
+                            sent_packets+=1
                     else:
-                        Sensors[sender].E -= my_model.ETX * PacketSize + my_model.Efs * PacketSize * pow(distance, 4)
+                        Sensors[sender].E -= my_model.ETX * PacketSize + my_model.Efs * PacketSize * pow(distance, 2)
                         rec_packets, sent_packets = send_rec(Sensors, my_model, sender, receiver, PacketSize,
                                                              sent_packets, rec_packets)
-
+                        if Sensors[sender].E > 0:
+                            sent_packets+=1
+    for receiver in receivers:
+        Sensors[receiver].E-=(my_model.ERX +my_model.EDA )* PacketSize
+    for sender in senders:
+        for receiver in receivers:
+            if Sensors[sender].E>0 and Sensors[receiver].E>0:
+                    rec_packets+=1
     if packet_type == 'Hello':
         srp += sent_packets
         rrp += rec_packets

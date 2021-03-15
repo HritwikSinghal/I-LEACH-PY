@@ -80,7 +80,8 @@ def create_sensors(my_model: Model):
     # Configuration Sensors
     # created extra one slot for sink
     Sensors = [Sensor() for _ in range(n + 1)]
-
+    for sensor in Sensors:
+        sensor.MCH=my_model.n
     # for sink
     """ 
     first n - 1 slots in Sensors are for normal sensors. (0 to n-1) 
