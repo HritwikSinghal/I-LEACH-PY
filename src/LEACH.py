@@ -267,7 +267,7 @@ class LEACHSimulation:
         print("#############################################")
         print()
 
-        for round_number in range(1, self.my_model.rmax + 1):
+        for round_number in range(0, self.my_model.rmax ):
             print('#####################################')
             print(f'############# Round {round_number} #############')
             print('#####################################')
@@ -284,10 +284,10 @@ class LEACHSimulation:
             self.sdp = 0  # counter number of sent data packets to sink
             self.rdp = 0  # counter number of receive data packets by sink
 
-            self.SRP[self.my_model.rmax] = self.srp
-            self.RRP[self.my_model.rmax] = self.rrp
-            self.SDP[self.my_model.rmax] = self.sdp
-            self.RDP[self.my_model.rmax] = self.rdp
+            self.SRP[round_number+1] = self.srp
+            self.RRP[round_number+1] = self.rrp
+            self.SDP[round_number+1] = self.sdp
+            self.RDP[round_number+1] = self.rdp
             reset_sensors.start(self.Sensors, self.my_model, round_number)
 
 
@@ -319,7 +319,7 @@ class LEACHSimulation:
             # ############# Plot network status in end of set-up phase #############
             # ######################################################################
             # Todo: Plot
-
+            # LEACH_plotter.start(self.Sensors,self.my_model,round_number)
             # ##############################################
             # ############# steady-state phase #############
             # ##############################################
@@ -395,7 +395,7 @@ class LEACHSimulation:
 
         # Broadcasting CH x to All Sensors that are in Radio Rage of x.
         # Doing this for all CH
-        for i in range(1,len(self.list_CH)):
+        for i in range(0,len(self.list_CH)):
             # todo: test
             # print(f'for cluster head: {ch_id}')
             self.sender=self.list_CH[i]
@@ -429,7 +429,7 @@ class LEACHSimulation:
         print()
 
         # changed from 1 to self.myModel.NumPacket
-        for i in range(self.my_model.NumPacket):  # Number of Packets to be sent in steady-state phase
+        for i in range(0,1):  # Number of Packets to be sent in steady-state phase
 
             # ########################################
             # ############# plot Sensors #############

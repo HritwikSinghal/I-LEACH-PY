@@ -63,10 +63,10 @@ def start(Sensors: list[Sensor], myModel, round_number: int):
                 print(f'for {Sensors[i].id}, temprand = {temp_rand}, value = {value}')
                 if temp_rand <= value:
                     print(f"Adding {Sensors[i].id} to CH")
-                    countCHs+=1
                     CH.insert(countCHs,Sensors[i].id)
                     Sensors[i].type = 'C'
                     Sensors[i].G = round(1 / myModel.p) - 1
+                    countCHs += 1
 
                 # # mark this cirle now that it has a CH
                 # CH_selected_arr(row_circle_of_node, col_circle_of_node) = 1

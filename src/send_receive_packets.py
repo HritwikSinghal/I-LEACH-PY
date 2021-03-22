@@ -46,8 +46,8 @@ def start(Sensors: list[Sensor], my_model: Model, senders: list, receivers: list
 
                     if distance > my_model.do:
                         Sensors[sender].E -= my_model.ETX * PacketSize + my_model.Emp * PacketSize * pow(distance, 4)
-                        rec_packets, sent_packets = send_rec(Sensors, my_model, sender, receiver, PacketSize,
-                                                             sent_packets, rec_packets)
+                        # rec_packets, sent_packets = send_rec(Sensors, my_model, sender, receiver, PacketSize,
+                        #                                      sent_packets, rec_packets)
                         if Sensors[sender].E > 0:
                             sent_packets+=1
                     else:
